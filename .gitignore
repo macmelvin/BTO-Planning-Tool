@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+functions/node_modules/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*.log
+
+# Service account keys / secrets — never commit these
+serviceAccountKey.json
+*-firebase-adminsdk-*.json
+.env
+.env.local
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Firebase emulator data
+firebase-export-*/

@@ -1,0 +1,76 @@
+rules_version = '2';
+
+// BTO Planning Tool — Firestore Security Rules
+// Sprint 0 baseline. Default-deny everything not explicitly matched below.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------------
+    // USER-OWNED DATA
+    // Covers anonymous-auth users (pre-signup) and linked accounts —
+    // request.auth.uid is stable across the anonymous → linked upgrade,
+    // so no data migration is needed when a user links a real account.
+    // ---------------------------------------------------------------
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /eligibilityAnswers/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /applications/{applicationId} {
+        allow read: if isOwner(userId);
+        // Validate shape on create/update — keep this loose in Sprint 0,
+        // tighten once the questionnaire's real output shape is finalized.
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasAll(['projectId', 'flatType'])
+          && request.resource.data.projectId is string
+          && request.resource.data.flatType is string;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // PUBLIC REFERENCE DATA
+    // Scheme definitions, dropout benchmarks, and project/launch data
+    // are read-only for all authenticated users. Writes only via the
+    // Admin SDK (server-side script / Cloud Function / console) —
+    // never from the client, since this is the data you maintain
+    // every launch cycle, not something users should be able to alter.
+    // ---------------------------------------------------------------
+    match /schemeDefinitions/{schemeId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /dropoutBenchmarks/{benchmarkId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /flatTypeOfferings/{flatType} {
+        allow read: if request.auth != null;
+        allow write: if false;
+
+        match /schemeQuotaPools/{scheme} {
+          allow read: if request.auth != null;
+          allow write: if false;
+        }
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Everything else: denied by default (no match = no access in
+    // Firestore rules — this comment is just documenting the intent).
+    // ---------------------------------------------------------------
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

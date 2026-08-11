@@ -1,0 +1,76 @@
+{
+  "_comment": "Seed data for /schemeDefinitions/* and /dropoutBenchmarks/* — write via Admin SDK script, never from the client. Source: HDB/MyNiceHome, last confirmed 24 June 2026. Version this file and re-run the seed script whenever HDB updates scheme rules.",
+
+  "schemeDefinitions": {
+    "FPPS": {
+      "name": "Family and Parenthood Priority Scheme",
+      "quotaPercentBTO": 40,
+      "quotaPercentSBF": 60,
+      "quotaNote": "Up to 40% of BTO flat supply and up to 60% of SBF flat supply",
+      "canPairWithSecondary": true,
+      "version": "2026-06-24"
+    },
+    "FCS_PROXIMITY": {
+      "name": "Family Care Scheme (Proximity)",
+      "replacesSchemes": ["MCPS", "SPS_LIVING_WITH_NEAR"],
+      "quotaPercentFirstTimerFamily": 30,
+      "quotaNote": "Up to 30% of public supply for BTO/SBF (first-timer families); separate senior and single quotas apply",
+      "canPairWithSecondary": true,
+      "postMopComplianceRequired": true,
+      "version": "2025-07-01"
+    },
+    "FCS_JOINT_BALLOTING": {
+      "name": "Family Care Scheme (Joint Balloting)",
+      "replacesSchemes": ["MGPS"],
+      "quotaPercentForParent": 15,
+      "quotaPercentForChild": 15,
+      "eligibleFlatTypes": ["2RoomFlexi", "3Room"],
+      "canPairWithSecondary": false,
+      "version": "2025-07-01"
+    },
+    "TCPS": {
+      "name": "Third Child Priority Scheme",
+      "quotaPercentBTO": 10,
+      "quotaPercentSBF": 10,
+      "canPairWithSecondary": true,
+      "ballotsBeforeFPPS": true,
+      "version": "2026-06-24"
+    },
+    "ASSIST": {
+      "name": "Assistance Scheme for Second-Timers (Divorced/Widowed Parents)",
+      "quotaPercent2RoomFlexi": 5,
+      "quotaPercent3Room": 10,
+      "eligibleClassification": ["Standard"],
+      "canPairWithSecondary": false,
+      "version": "2026-06-24"
+    },
+    "SPS": {
+      "name": "Senior Priority Scheme (near existing home)",
+      "eligibleFlatTypes": ["2RoomFlexi"],
+      "canPairWithSecondary": false,
+      "_needsConfirmation": "Exact senior age threshold not stated on source page as of last fetch — confirm before enabling this scheme in production, do not assume 55.",
+      "version": "2026-06-24"
+    },
+    "TPS": {
+      "name": "Tenants' Priority Scheme",
+      "quotaPercent": 10,
+      "eligibleFlatTypes": ["2RoomFlexi", "3Room"],
+      "minTenancyYears": 2,
+      "canPairWithSecondary": false,
+      "version": "2026-06-24"
+    }
+  },
+
+  "dropoutBenchmarks": {
+    "mature": {
+      "historicalThresholdMultiplier": 1.17,
+      "sourceNote": "Community-observed figure from unofficial application trackers, not HDB-published. Label as estimate in UI.",
+      "lastUpdated": "2026-08-11"
+    },
+    "nonMature": {
+      "historicalThresholdMultiplier": 1.02,
+      "sourceNote": "Community-observed figure from unofficial application trackers, not HDB-published. Label as estimate in UI.",
+      "lastUpdated": "2026-08-11"
+    }
+  }
+}
