@@ -13,10 +13,10 @@ Related specs already written:
 
 This sprint has no user-visible output. That's normal — skipping it to get to "something to show" is the most common way this kind of app gets rebuilt from scratch later.
 
-- [ ] **Firestore security rules** — lock down `/users/{userId}/*` so only the authenticated owner can read/write their own eligibility answers and applications. This data (marital status, citizenship, children, divorce status) is sensitive; default-open rules are not acceptable even for a prototype.
-- [ ] **Auth setup** — decide sign-in method (email link, Google sign-in) before building the questionnaire, since Step 1 of the flow needs a userId to persist partial progress against.
-- [ ] **Config collections as data, not code** — set up `/schemeDefinitions/*` and `/dropoutBenchmarks/*` as Firestore documents you can edit without a redeploy, per the "rules change" risk flagged in the eligibility rules engine doc. Build this scaffolding now, even empty, so Sprint 2 doesn't tempt you into hardcoding.
-- [ ] **Data privacy note** — decide and document (even briefly) what happens to a user's eligibility data if they delete their account. This matters more here than in Protein Tracker given the sensitivity of the fields involved.
+- [X] **Firestore security rules** — lock down `/users/{userId}/*` so only the authenticated owner can read/write their own eligibility answers and applications. This data (marital status, citizenship, children, divorce status) is sensitive; default-open rules are not acceptable even for a prototype.
+- [X] **Auth setup** — decide sign-in method (email link, Google sign-in) before building the questionnaire, since Step 1 of the flow needs a userId to persist partial progress against.
+- [X] **Config collections as data, not code** — set up `/schemeDefinitions/*` and `/dropoutBenchmarks/*` as Firestore documents you can edit without a redeploy, per the "rules change" risk flagged in the eligibility rules engine doc. Build this scaffolding now, even empty, so Sprint 2 doesn't tempt you into hardcoding.
+- [X] **Data privacy note** — decide and document (even briefly) what happens to a user's eligibility data if they delete their account. This matters more here than in Protein Tracker given the sensitivity of the fields involved.
 
 ## Sprint 1: Eligibility Questionnaire (Part B of the rules engine doc)
 
