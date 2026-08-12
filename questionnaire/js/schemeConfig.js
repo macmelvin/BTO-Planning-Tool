@@ -75,12 +75,13 @@ export const SCHEME_CONFIG = {
             { op: "fieldEquals", field: "spouseCitizenship", value: "SC" },
           ],
         },
-        {
-          any: [
-            { op: "childCountGte", value: 3 },
-            { op: "hasExpectingChild" },
-          ],
-        },
+        // childCountGte(3) already covers "expecting a third child" — the
+        // children array counts expecting entries too, so 2 born children
+        // + 1 expecting reaches 3 on its own. A separate hasExpectingChild
+        // branch here would wrongly qualify a family expecting their FIRST
+        // child — HDB's June 2026 TCPS enhancement specifically covers
+        // families expecting their THIRD (i.e. already have 2).
+        { op: "childCountGte", value: 3 },
         { not: { op: "fieldEquals", field: "previouslyBoughtFlatUnderTCPS", value: true } },
       ],
     },
