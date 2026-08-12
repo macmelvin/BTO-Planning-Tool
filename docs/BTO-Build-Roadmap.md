@@ -53,6 +53,26 @@ This sprint has no user-visible output. That's normal — skipping it to get to 
 
 ## Sprint 6: Admin Form for Launch Windows (post-MVP)
 
+
+## Sprint 7: Admin Form for Projects & Application Rates (post-MVP)
+
+Same motivation as Sprint 6, applied to Sprint 4's data instead of launch
+windows — updating application rates required editing scripts/seedProjects.js
+and re-running it with a service account key each BTO cycle.
+
+- [X] Changed firestore.rules: projects/flatTypeOfferings/exerciseSummaries
+      now allow admin writes (previously hardcoded write: if false — only
+      the Admin SDK script could touch them)
+- [X] Built /admin/projects/ — add new projects, add/update flat type
+      offerings (units, application rates, data source), edit the exercise
+      summary, all through a UI
+- [X] Same access control as Sprint 6 — gated to macmelvin.tan@gmail.com,
+      enforced in firestore.rules, not just hidden client-side
+
+Note: this doesn't reduce the actual research time (finding real published
+application rates each cycle) — it only removes the friction of entering
+that data once found. scripts/seedProjects.js is no longer the primary way
+to add project data, but is still useful for first-time/bulk seeding.
 Not in the original 5-sprint plan — added after realizing launch window
 data lived in two places (calendar/js/launchCalendar.js and
 functions/launchWindows.json) and had to be manually kept in sync.
