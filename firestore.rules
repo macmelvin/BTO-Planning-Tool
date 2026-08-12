@@ -21,8 +21,6 @@ service cloud.firestore {
 
       match /applications/{applicationId} {
         allow read: if isOwner(userId);
-        // Validate shape on create/update — keep this loose in Sprint 0,
-        // tighten once the questionnaire's real output shape is finalized.
         allow create, update: if isOwner(userId)
           && request.resource.data.keys().hasAll(['projectId', 'flatType'])
           && request.resource.data.projectId is string
@@ -30,11 +28,6 @@ service cloud.firestore {
         allow delete: if isOwner(userId);
       }
 
-      // Sprint 3: FCM push tokens. Read access isn't needed client-side
-      // (the app writes a token and never needs to read it back), so this
-      // is write/delete only from the client — the Cloud Function that
-      // sends reminders uses the Admin SDK, which bypasses these rules
-      // entirely, so no read rule is needed here for that path either.
       match /notificationTokens/{tokenId} {
         allow write, delete: if isOwner(userId);
         allow read: if false;
@@ -43,11 +36,6 @@ service cloud.firestore {
 
     // ---------------------------------------------------------------
     // PUBLIC REFERENCE DATA
-    // Scheme definitions, dropout benchmarks, and project/launch data
-    // are read-only for all authenticated users. Writes only via the
-    // Admin SDK (server-side script / Cloud Function / console) —
-    // never from the client, since this is the data you maintain
-    // every launch cycle, not something users should be able to alter.
     // ---------------------------------------------------------------
     match /schemeDefinitions/{schemeId} {
       allow read: if request.auth != null;
@@ -58,7 +46,8 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if false;
     }
-match /exerciseSummaries/{exercise} {
+
+    match /exerciseSummaries/{exercise} {
       allow read: if request.auth != null;
       allow write: if false;
     }
@@ -78,13 +67,29 @@ match /exerciseSummaries/{exercise} {
       }
     }
 
+    // Sprint 6: launch windows are the one collection with client-side
+    // writes enabled — gated to a single admin identity by email, checked
+    // server-side. This is real enforcement: even if someone bypassed the
+    // admin UI entirely and hit Firestore directly, this rule still holds.
+    match /launchWindows/{quarter} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
     // ---------------------------------------------------------------
-    // Everything else: denied by default (no match = no access in
-    // Firestore rules — this comment is just documenting the intent).
+    // Everything else: denied by default.
     // ---------------------------------------------------------------
 
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      // Hardcoded to one email rather than a role/claims system — deliberate
+      // simplicity for a solo-admin app. If this ever needs multiple admins,
+      // migrate to Firebase custom claims instead of a growing email list here.
+      return request.auth != null
+        && request.auth.token.email == 'macmelvin.tan@gmail.com';
     }
   }
 }

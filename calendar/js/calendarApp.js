@@ -1,4 +1,4 @@
-import { getNextLaunchWindow, getHfeDeadline, daysUntil, formatDate, LAUNCH_WINDOWS } from "./launchCalendar.js";
+import { getNextLaunchWindow, getHfeDeadline, daysUntil, formatDate, listLaunchWindows } from "./launchCalendar.js";
 import { enableLaunchReminders } from "./notifications.js";
 import { ensureSignedIn } from "../../questionnaire/js/firebase-config.js";
 
@@ -8,15 +8,15 @@ init();
 
 async function init() {
   await ensureSignedIn(); // needed before enableLaunchReminders() can write a token doc
-  render();
+  await render();
 }
 
-function render() {
+async function render() {
   root.innerHTML = "";
   root.appendChild(buildHeader());
-  root.appendChild(buildNextLaunchCard());
+  root.appendChild(await buildNextLaunchCard());
   root.appendChild(buildReminderCard());
-  root.appendChild(buildFullCalendar());
+  root.appendChild(await buildFullCalendar());
   root.appendChild(buildFooterDisclaimer());
 }
 
@@ -30,10 +30,10 @@ function buildHeader() {
   return wrap;
 }
 
-function buildNextLaunchCard() {
+async function buildNextLaunchCard() {
   const card = document.createElement("div");
   card.className = "card";
-  const next = getNextLaunchWindow();
+  const next = await getNextLaunchWindow();
 
   if (!next) {
     card.innerHTML = `<h2>No upcoming launches on file</h2><p class="helper">Check back soon — this calendar is updated each quarter.</p>`;
@@ -44,6 +44,7 @@ function buildNextLaunchCard() {
   const daysToOpen = daysUntil(new Date(next.applicationOpenDate));
   const daysToHfe = daysUntil(hfeDeadline);
   const hfeDeadlinePassed = daysToHfe < 0;
+  const towns = next.towns || [];
 
   card.innerHTML = `
     <h2>Next launch: ${next.quarter}</h2>
@@ -58,7 +59,7 @@ function buildNextLaunchCard() {
         <span class="countdown-label">${hfeDeadlinePassed ? "HFE window has closed for this launch" : "days to apply for your HFE letter"}</span>
       </div>
     </div>
-    ${next.towns.length ? `<p class="helper">Towns expected: ${next.towns.join(", ")}</p>` : ""}
+    ${towns.length ? `<p class="helper">Towns expected: ${towns.join(", ")}</p>` : ""}
     ${!next.dateConfirmed ? `<div class="flag-box">This date is projected from HDB's quarterly pattern, not yet officially confirmed. Check back closer to the date.</div>` : ""}
     ${hfeDeadlinePassed ? `<div class="flag-box">The typical 6-week HFE lead time for this launch has passed — an HFE letter can still take time to process, so apply as soon as possible if you haven't already.</div>` : ""}
   `;
@@ -95,19 +96,28 @@ function buildReminderCard() {
   return card;
 }
 
-function buildFullCalendar() {
+async function buildFullCalendar() {
   const card = document.createElement("div");
   card.className = "card";
   card.innerHTML = `<h2>All known launch windows</h2>`;
-  LAUNCH_WINDOWS.forEach((w) => {
-    const row = document.createElement("div");
-    row.className = "scheme-row";
-    row.innerHTML = `
-      <span class="scheme-name">${w.quarter}</span>
-      <span class="scheme-quota">${formatDate(new Date(w.applicationOpenDate))}${w.dateConfirmed ? "" : " (projected)"}</span>
-    `;
-    card.appendChild(row);
-  });
+  const windows = await listLaunchWindows();
+
+  if (windows.length === 0) {
+    card.innerHTML += `<p class="helper">No launch windows on file yet.</p>`;
+    return card;
+  }
+
+  windows
+    .sort((a, b) => a.applicationOpenDate.localeCompare(b.applicationOpenDate))
+    .forEach((w) => {
+      const row = document.createElement("div");
+      row.className = "scheme-row";
+      row.innerHTML = `
+        <span class="scheme-name">${w.quarter}</span>
+        <span class="scheme-quota">${formatDate(new Date(w.applicationOpenDate))}${w.dateConfirmed ? "" : " (projected)"}</span>
+      `;
+      card.appendChild(row);
+    });
   return card;
 }
 

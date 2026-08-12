@@ -1,32 +1,30 @@
 /**
- * BTO Launch Calendar — static/manually-updated data, per Sprint 3 scope.
- *
- * HDB runs BTO launches on a quarterly cycle: Feb, May, Aug, Nov. Exact
- * project names and dates for a given quarter are only announced roughly
- * 1-2 months ahead, so this file holds the *known* launch windows (update
- * each quarter as HDB announces them) plus logic to project future windows
- * when a specific one isn't yet announced.
- *
- * Update this file every quarter — same "config as data" principle as
- * schemeConfig.js. In production, move this to Firestore too
- * (/launchWindows/*) so updates don't need a redeploy.
+ * BTO Launch Calendar — Sprint 6: now reads from Firestore's
+ * /launchWindows/* collection (managed via admin/) instead of a hardcoded
+ * array. This eliminates the duplication risk flagged in Sprint 3, where
+ * this data lived separately in calendar/js/launchCalendar.js AND
+ * functions/launchWindows.json and had to be kept in sync by hand.
  */
+import {
+  getFirestore,
+  collection,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { app } from "../../questionnaire/js/firebase-config.js";
 
-// Known/announced launch windows — update as HDB confirms each quarter.
-// dateConfirmed: false means this is a projected date based on the
-// quarterly pattern, not an official HDB announcement yet.
-export const LAUNCH_WINDOWS = [
-  { quarter: "2026-08", applicationOpenDate: "2026-08-19", dateConfirmed: true, towns: ["Tengah", "Bukit Merah", "Kallang Whampoa"] },
-  { quarter: "2026-11", applicationOpenDate: "2026-11-18", dateConfirmed: false, towns: [] },
-  { quarter: "2027-02", applicationOpenDate: "2027-02-17", dateConfirmed: false, towns: [] },
-];
-
+const db = getFirestore(app);
 const HFE_LEAD_WEEKS = 6;
 
-export function getNextLaunchWindow(fromDate = new Date()) {
-  const upcoming = LAUNCH_WINDOWS.filter(
-    (w) => new Date(w.applicationOpenDate) >= fromDate
-  ).sort((a, b) => new Date(a.applicationOpenDate) - new Date(b.applicationOpenDate));
+export async function listLaunchWindows() {
+  const snap = await getDocs(collection(db, "launchWindows"));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function getNextLaunchWindow(fromDate = new Date()) {
+  const windows = await listLaunchWindows();
+  const upcoming = windows
+    .filter((w) => new Date(w.applicationOpenDate) >= fromDate)
+    .sort((a, b) => new Date(a.applicationOpenDate) - new Date(b.applicationOpenDate));
   return upcoming[0] || null;
 }
 

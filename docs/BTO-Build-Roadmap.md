@@ -47,8 +47,8 @@ This sprint has no user-visible output. That's normal — skipping it to get to 
 
 ## Sprint 5: Application Tracker
 
-- [ ] User saves their own queue number + project once results are out
-- [ ] History across multiple attempts
+- [X] User saves their own queue number + project once results are out
+- [X] History across multiple attempts
 - [ ] Manual refresh of odds as appointment approaches
 
 ---
