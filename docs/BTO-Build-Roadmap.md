@@ -49,8 +49,26 @@ This sprint has no user-visible output. That's normal — skipping it to get to 
 
 - [X] User saves their own queue number + project once results are out
 - [X] History across multiple attempts
-- [ ] Manual refresh of odds as appointment approaches
+- [X] Manual refresh of odds as appointment approaches
 
+## Sprint 6: Admin Form for Launch Windows (post-MVP)
+
+Not in the original 5-sprint plan — added after realizing launch window
+data lived in two places (calendar/js/launchCalendar.js and
+functions/launchWindows.json) and had to be manually kept in sync.
+
+- [X] Moved launch window data into Firestore (/launchWindows/*) as the
+      single source of truth — both the calendar page and the reminder
+      Cloud Function now read from the same place
+- [X] Built an admin-only form (/admin/) to add/update/delete launch
+      windows through a UI instead of editing JSON files by hand
+- [X] Access restricted to macmelvin.tan@gmail.com, enforced server-side
+      in firestore.rules' isAdmin() function — not just hidden client-side
+- [X] Migrated the 3 existing launch windows via scripts/migrateLaunchWindows.js
+- [X] Deleted functions/launchWindows.json — no longer needed
+
+Going forward: update launch windows via /admin/ each BTO cycle, not by
+editing files directly.
 ---
 
 ## Deferred (v1.5+, per the all-in-one MVP doc — don't start these early)
