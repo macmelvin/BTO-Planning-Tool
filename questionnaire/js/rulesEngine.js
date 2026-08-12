@@ -12,8 +12,13 @@ import { SCHEME_CONFIG } from "./schemeConfig.js";
 
 // ---------- Derived facts (computed once, reused across all schemes) ----------
 function computeDerivedFacts(applicant) {
-  const spouseOk =
-    applicant.maritalStatus !== "married" || applicant.spouseIsFirstTimer;
+  // Step 1 of the questionnaire asks for the spouse/fiancé(e)'s first-timer
+  // status whenever maritalStatus is "married" OR "engaged" — this check
+  // must cover both, or an engaged applicant's fiancé(e) answer is silently
+  // ignored and a second-timer fiancé(e) wrongly counts as a first-timer family.
+  const hasSpouseOrFiance =
+    applicant.maritalStatus === "married" || applicant.maritalStatus === "engaged";
+  const spouseOk = !hasSpouseOrFiance || applicant.spouseIsFirstTimer;
   return {
     isFirstTimerFamily: Boolean(applicant.isFirstTimer && spouseOk),
   };
