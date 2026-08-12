@@ -28,9 +28,9 @@ This sprint has no user-visible output. That's normal — skipping it to get to 
 
 ## Sprint 2: Priority Scheme Rules Engine (Part A of the rules engine doc)
 
-- [ ] Implement per-scheme eligibility functions as data-driven config (not inline conditionals) so scheme updates don't require app releases
-- [ ] Implement scheme stacking/ballot order resolution
-- [ ] **Before shipping:** confirm the two open questions flagged in the rules engine doc — senior age threshold for SPS, and FCS(Proximity)+FPPS ballot order. Don't hardcode a guess.
+- [X] Implement per-scheme eligibility functions as data-driven config (not inline conditionals) so scheme updates don't require app releases
+- [X] Implement scheme stacking/ballot order resolution
+- [X] **Before shipping:** confirm the two open questions flagged in the rules engine doc — senior age threshold for SPS, and FCS(Proximity)+FPPS ballot order. Don't hardcode a guess.
 
 ## Sprint 3: Launch Calendar + Reminders
 
