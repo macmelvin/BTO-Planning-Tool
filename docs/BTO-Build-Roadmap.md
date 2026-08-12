@@ -20,9 +20,9 @@ This sprint has no user-visible output. That's normal — skipping it to get to 
 
 ## Sprint 1: Eligibility Questionnaire (Part B of the rules engine doc)
 
-- [ ] Build Step 1–2 (household basics, children) — the largest share of users, gets you to a demoable core fast
-- [ ] Build Step 3–4 (family proximity, housing situation) — branching logic, more complex UI
-- [ ] Build Step 5–6 (flat type selection, results screen)
+- [X] Build Step 1–2 (household basics, children) — the largest share of users, gets you to a demoable core fast
+- [X] Build Step 3–4 (family proximity, housing situation) — branching logic, more complex UI
+- [X] Build Step 5–6 (flat type selection, results screen)
 - [ ] Wire questionnaire output → `resolveApplicableSchemes()` logic from the rules engine doc
 - [ ] Ship the disclaimer language — non-negotiable, ship with Sprint 1, not "later"
 
