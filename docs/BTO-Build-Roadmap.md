@@ -34,9 +34,9 @@ This sprint has no user-visible output. That's normal — skipping it to get to 
 
 ## Sprint 3: Launch Calendar + Reminders
 
-- [ ] Static/manually-updated launch calendar (quarterly cycle)
-- [ ] Push notification setup — confirm TWA web-push support before this sprint, since it determines whether this sprint is straightforward or needs a platform rethink
-- [ ] HFE letter deadline reminder logic
+- [X] Static/manually-updated launch calendar (quarterly cycle)
+- [X] Push notification setup — confirm TWA web-push support before this sprint, since it determines whether this sprint is straightforward or needs a platform rethink
+- [X] HFE letter deadline reminder logic
 
 ## Sprint 4: Odds Calculator (Part A of the odds calculator doc)
 
