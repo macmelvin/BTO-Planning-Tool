@@ -15,6 +15,10 @@ function blankApplicant() {
     spouseIsFirstTimer: null,
     isDivorcedOrWidowedWithChildUnder18: false,
     ownedOrAcquiredPropertyAfterDivorceOrSpouseDeath: false,
+    // null = unanswered, true = yes, false = no — tracked separately from
+    // children.length so a "No" answer isn't indistinguishable from never
+    // having answered (both would otherwise mean an empty children array).
+    hasChildrenOrExpecting: null,
     children: [],
     parentLink: null,
     marriedChildLink: null,
@@ -257,11 +261,11 @@ function renderStep1b(card) {
 function renderStep2(card) {
   card.innerHTML = `<h2>Children</h2><p class="helper">Include children you have now, or are expecting.</p>`;
 
-  const hasAny = applicant.children.length > 0;
   choiceGroup(card, "Do you have children, or are you expecting?", [
     { value: "yes", text: "Yes" }, { value: "no", text: "No" },
-  ], hasAny ? "yes" : (applicant.children.length === 0 && currentStep === "2" ? null : "no"),
+  ], applicant.hasChildrenOrExpecting === null ? null : (applicant.hasChildrenOrExpecting ? "yes" : "no"),
     (v) => {
+      applicant.hasChildrenOrExpecting = v === "yes";
       if (v === "no") { applicant.children = []; }
       else if (applicant.children.length === 0) { applicant.children.push({ citizenship: "SC", age: 0, isAdopted: false, isFromExpecting: false }); }
       persist(); render();
