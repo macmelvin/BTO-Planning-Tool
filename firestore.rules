@@ -8,9 +8,6 @@ service cloud.firestore {
 
     // ---------------------------------------------------------------
     // USER-OWNED DATA
-    // Covers anonymous-auth users (pre-signup) and linked accounts —
-    // request.auth.uid is stable across the anonymous → linked upgrade,
-    // so no data migration is needed when a user links a real account.
     // ---------------------------------------------------------------
     match /users/{userId} {
       allow read, write: if isOwner(userId);
@@ -36,6 +33,12 @@ service cloud.firestore {
 
     // ---------------------------------------------------------------
     // PUBLIC REFERENCE DATA
+    // schemeDefinitions/dropoutBenchmarks stay write:false — those are
+    // rules/config, edited far less often and via the seed script's
+    // deliberate versioning discipline (see config/seed-config-data.json
+    // comments). exerciseSummaries and projects/flatTypeOfferings are
+    // the data admin needs to update every BTO cycle, so those now allow
+    // admin writes the same way launchWindows does.
     // ---------------------------------------------------------------
     match /schemeDefinitions/{schemeId} {
       allow read: if request.auth != null;
@@ -49,28 +52,24 @@ service cloud.firestore {
 
     match /exerciseSummaries/{exercise} {
       allow read: if request.auth != null;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     match /projects/{projectId} {
       allow read: if request.auth != null;
-      allow write: if false;
+      allow write: if isAdmin();
 
       match /flatTypeOfferings/{flatType} {
         allow read: if request.auth != null;
-        allow write: if false;
+        allow write: if isAdmin();
 
         match /schemeQuotaPools/{scheme} {
           allow read: if request.auth != null;
-          allow write: if false;
+          allow write: if isAdmin();
         }
       }
     }
 
-    // Sprint 6: launch windows are the one collection with client-side
-    // writes enabled — gated to a single admin identity by email, checked
-    // server-side. This is real enforcement: even if someone bypassed the
-    // admin UI entirely and hit Firestore directly, this rule still holds.
     match /launchWindows/{quarter} {
       allow read: if request.auth != null;
       allow write: if isAdmin();
@@ -85,9 +84,6 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      // Hardcoded to one email rather than a role/claims system — deliberate
-      // simplicity for a solo-admin app. If this ever needs multiple admins,
-      // migrate to Firebase custom claims instead of a growing email list here.
       return request.auth != null
         && request.auth.token.email == 'macmelvin.tan@gmail.com';
     }

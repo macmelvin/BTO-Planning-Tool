@@ -57,6 +57,7 @@ function buildHeader() {
   wrap.innerHTML = `
     <div class="eyebrow">BTO Planning Tool — Admin</div>
     <h1>Manage launch windows</h1>
+    <p class="helper"><a href="projects/index.html">Manage projects & application rates →</a></p>
   `;
   return wrap;
 }
