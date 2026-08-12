@@ -13,14 +13,13 @@ import {
   getDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// TODO: replace with your actual Firebase project config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyCrogqwbg6gzp3rghlem7GRNCPoWtdLxGQ",
+  authDomain: "bto-planning-tool.firebaseapp.com",
+  projectId: "bto-planning-tool",
+  storageBucket: "bto-planning-tool.firebasestorage.app",
+  messagingSenderId: "433070319814",
+  appId: "1:433070319814:web:1f8cbb0a879f2161f64fc7",
 };
 
 const app = initializeApp(firebaseConfig);

@@ -1,145 +1,126 @@
 /**
- * BTO Eligibility & Priority Scheme Rules Engine
- * Implements the logic specified in docs/BTO-Eligibility-Rules-Engine.md
+ * BTO Eligibility & Priority Scheme Rules Engine — Sprint 2 refactor.
  *
- * Kept as pure functions operating on a plain Applicant object, decoupled
- * from the questionnaire UI — the UI's only job is to populate this shape
- * and call resolveApplicableSchemes(). See docs for the "why" behind each rule.
+ * Sprint 1 hardcoded one JS function per scheme. That meant every HDB rule
+ * change (and they've already changed once, July 2025) required editing
+ * this file and shipping a new app release. This version is a generic
+ * condition interpreter that reads scheme rules from schemeConfig.js (or,
+ * in production, from Firestore's /schemeDefinitions/* collection) — so a
+ * quota or condition change becomes a data update, not a code change.
  */
+import { SCHEME_CONFIG } from "./schemeConfig.js";
 
-// Scheme quota reference — mirrors config/seed-config-data.json.
-// In production, fetch this from Firestore's /schemeDefinitions/* collection
-// instead of hardcoding, so quota updates don't require a redeploy. Kept
-// inline here for Sprint 1 so the questionnaire is demoable without wiring
-// Firestore reads first.
-export const SCHEME_QUOTA_NOTES = {
-  FPPS: "Up to 40% of BTO flat supply, up to 60% of SBF flat supply",
-  FCS_PROXIMITY: "Up to 30% of public supply for first-timer families",
-  FCS_JOINT_BALLOTING: "15% reserved for parent, 15% reserved for child — separate queue numbers",
-  TCPS: "Up to 10% of BTO flat supply, up to 10% of SBF flat supply",
-  ASSIST: "5% for 2-room Flexi, 10% for 3-room (Standard flats only)",
-  SPS: "Reserved quota for eligible 2-room Flexi applicants",
-  TPS: "Up to 10% of eligible flat supply",
-};
-
-function hasChildUnder(applicant, ageLimit) {
-  return applicant.children.some(
-    (c) => c.citizenship === "SC" && c.age <= ageLimit
-  );
-}
-
-function hasExpectingChildWithCert(applicant) {
-  return applicant.children.some((c) => c.isFromExpecting === true);
-}
-
-function isFirstTimerFamily(applicant) {
+// ---------- Derived facts (computed once, reused across all schemes) ----------
+function computeDerivedFacts(applicant) {
   const spouseOk =
     applicant.maritalStatus !== "married" || applicant.spouseIsFirstTimer;
-  return applicant.isFirstTimer && spouseOk;
+  return {
+    isFirstTimerFamily: Boolean(applicant.isFirstTimer && spouseOk),
+  };
 }
 
+// ---------- Generic condition interpreter ----------
+// `op` list — this is the small vocabulary every scheme's conditions are
+// built from. Add a new op here (and use it in schemeConfig.js) rather than
+// writing a bespoke per-scheme function, so the vocabulary stays reusable.
+function getField(applicant, path) {
+  return path.split(".").reduce((obj, key) => (obj == null ? null : obj[key]), applicant);
+}
+
+function evaluateCondition(cond, applicant, derived) {
+  if (cond.all) return cond.all.every((c) => evaluateCondition(c, applicant, derived));
+  if (cond.any) return cond.any.some((c) => evaluateCondition(c, applicant, derived));
+  if (cond.not) return !evaluateCondition(cond.not, applicant, derived);
+  if (!cond.op) {
+    throw new Error(
+      `Malformed rules-engine condition — expected "all", "any", "not", or "op", got: ${JSON.stringify(cond)}`
+    );
+  }
+
+  switch (cond.op) {
+    case "isFirstTimerFamily":
+      return derived.isFirstTimerFamily;
+    case "fieldEquals":
+      return getField(applicant, cond.field) === cond.value;
+    case "fieldIn":
+      return cond.values.includes(getField(applicant, cond.field));
+    case "fieldGte":
+      return (getField(applicant, cond.field) ?? -Infinity) >= cond.value;
+    case "ageGte":
+      return (applicant.age ?? -Infinity) >= cond.value;
+    case "hasChildUnder":
+      return applicant.children.some((c) => c.citizenship === "SC" && c.age <= cond.ageLimit);
+    case "hasExpectingChild":
+      return applicant.children.some((c) => c.isFromExpecting === true);
+    case "childCountGte":
+      return applicant.children.length >= cond.value;
+    case "flatTypeIn":
+      return cond.values.includes(applicant.targetFlatType);
+    case "parentIncluded":
+      return Boolean(applicant.parentLink && applicant.parentLink.included);
+    case "marriedChildIncluded":
+      return Boolean(applicant.marriedChildLink && applicant.marriedChildLink.included);
+    case "parentProximityOk": {
+      const p = applicant.parentLink;
+      if (!p || !p.included) return false;
+      return Boolean(
+        p.livingWithParent === true ||
+          (p.distanceToTargetFlatKm !== null && p.distanceToTargetFlatKm <= cond.maxKm)
+      );
+    }
+    default:
+      // Fail closed — an unrecognized op should never silently grant
+      // eligibility. Surfacing this in dev is safer than a false positive.
+      console.warn(`Unknown rules-engine condition op: "${cond.op}"`);
+      return false;
+  }
+}
+
+// ---------- Public API ----------
 export function evaluateEligibility(applicant) {
-  const results = {};
+  const derived = computeDerivedFacts(applicant);
+  const results = { isFirstTimerFamily: derived.isFirstTimerFamily };
 
-  // --- First-Timer baseline ---
-  results.isFirstTimerFamily = isFirstTimerFamily(applicant);
+  for (const [schemeKey, scheme] of Object.entries(SCHEME_CONFIG)) {
+    results[schemeKey] = evaluateCondition(scheme.eligibilityConditions, applicant, derived);
+  }
 
-  // --- FT(PMC) — subset of FPPS-eligible applicants ---
-  results.FTPMC =
-    results.isFirstTimerFamily &&
-    applicant.maritalStatus === "married" &&
-    (hasChildUnder(applicant, 18) || hasExpectingChildWithCert(applicant));
-
-  // --- FPPS ---
-  results.FPPS =
-    results.isFirstTimerFamily &&
-    applicant.maritalStatus === "married" &&
-    (hasChildUnder(applicant, 18) || hasExpectingChildWithCert(applicant));
-
-  // --- FCS (Proximity) ---
-  const parent = applicant.parentLink;
-  results.FCS_Proximity = Boolean(
-    parent &&
-      parent.included &&
-      (parent.parentCitizenship === "SC" || parent.parentCitizenship === "SPR") &&
-      (parent.livingWithParent === true ||
-        (parent.distanceToTargetFlatKm !== null &&
-          parent.distanceToTargetFlatKm <= 4))
-  );
-
-  // --- FCS (Joint Balloting) ---
-  const marriedChild = applicant.marriedChildLink;
-  results.FCS_JointBalloting = Boolean(
-    parent &&
-      parent.included &&
-      marriedChild &&
-      marriedChild.included &&
-      ["2RoomFlexi", "3Room"].includes(applicant.targetFlatType)
-  );
-
-  // --- TCPS ---
-  const childCount = applicant.children.length;
-  const expectingThird = applicant.children.some((c) => c.isFromExpecting);
-  results.TCPS = Boolean(
-    (applicant.citizenship === "SC" || applicant.spouseCitizenship === "SC") &&
-      (childCount >= 3 || expectingThird) &&
-      !applicant.previouslyBoughtFlatUnderTCPS
-  );
-
-  // --- ASSIST ---
-  results.ASSIST = Boolean(
-    applicant.isDivorcedOrWidowedWithChildUnder18 &&
-      !applicant.ownedOrAcquiredPropertyAfterDivorceOrSpouseDeath &&
-      ["2RoomFlexi", "3Room"].includes(applicant.targetFlatType)
-  );
-
-  // --- SPS (near existing home) ---
-  // NOTE: senior age threshold not confirmed against an official source as of
-  // this build — see docs/BTO-Eligibility-Rules-Engine.md open question.
-  // Defaulting to 55 with a visible confidence flag rather than silently
-  // guessing; surface `results.SPS_needsConfirmation` in the UI.
-  results.SPS = Boolean(
-    applicant.age >= 55 &&
-      applicant.targetFlatType === "2RoomFlexi" &&
-      applicant.ownsOrOccupiesExistingProperty
-  );
-  results.SPS_needsConfirmation = true;
-
-  // --- TPS ---
-  results.TPS = Boolean(
-    applicant.currentlyHdbRentalTenant &&
-      applicant.hdbRentalTenancyDurationYears >= 2 &&
-      ["2RoomFlexi", "3Room"].includes(applicant.targetFlatType)
-  );
+  // FT(PMC) is a UI-facing sub-label of FPPS eligibility, not a separately
+  // configured scheme (see docs/BTO-Eligibility-Rules-Engine.md) — kept as
+  // a direct alias here rather than a duplicate config entry.
+  results.FTPMC = results.FPPS;
 
   return results;
 }
 
-/**
- * Resolves which scheme(s) an applicant should apply under, and in what
- * ballot order, per the 1+1 stacking rule documented in the rules engine.
- */
 export function resolveApplicableSchemes(eligibility) {
   let primary = null;
   let secondary = null;
   let ballotOrder = null;
+  let ballotOrderConfidence = null;
 
   if (eligibility.FPPS) {
     primary = "FPPS";
-    if (eligibility.TCPS) {
-      secondary = "TCPS";
-      ballotOrder = ["TCPS", "FPPS"]; // documented order: secondary balloted first
-    } else if (eligibility.FCS_Proximity) {
-      secondary = "FCS_Proximity";
-      ballotOrder = null; // NOT confirmed — see open question in rules engine doc
+    // Secondary candidates are schemes flagged canPairWithSecondary in
+    // config, evaluated in a fixed preference order (TCPS first — HDB's
+    // own confirmed worked example — then FCS_Proximity).
+    const candidates = ["TCPS", "FCS_Proximity"];
+    for (const key of candidates) {
+      if (eligibility[key] && SCHEME_CONFIG[key].canPairWithSecondary) {
+        secondary = key;
+        const order = SCHEME_CONFIG[key].ballotOrder;
+        if (order && order.position === "beforeFPPS") {
+          ballotOrder = [key, "FPPS"];
+          ballotOrderConfidence = order.confidence; // "confirmed" or "inferred"
+        }
+        break;
+      }
     }
   }
 
-  const eligibleList = Object.entries(eligibility)
-    .filter(([key, val]) => val === true && SCHEME_QUOTA_NOTES[key])
-    .map(([key]) => key);
+  const eligibleList = Object.keys(SCHEME_CONFIG).filter((key) => eligibility[key] === true);
 
-  return { primary, secondary, ballotOrder, eligibleList };
+  return { primary, secondary, ballotOrder, ballotOrderConfidence, eligibleList };
 }
 
 export function buildEligibilityResult(applicant) {
@@ -152,9 +133,9 @@ export function buildEligibilityResult(applicant) {
       "FCS (Proximity): the qualifying parent/child must continue living with you or within 4km through your flat's Minimum Occupation Period."
     );
   }
-  if (eligibility.SPS_needsConfirmation && eligibility.SPS) {
+  if (stacking.ballotOrderConfidence === "inferred") {
     complianceFlags.push(
-      "Senior Priority Scheme eligibility shown here uses an unconfirmed age threshold — verify directly with HDB before relying on this."
+      "The ballot order shown for FCS (Proximity) + FPPS is inferred from HDB's general description of how paired schemes work, not from a worked example specific to this combination. Confirm with HDB before relying on the exact sequence."
     );
   }
 
@@ -163,7 +144,7 @@ export function buildEligibilityResult(applicant) {
     qualifiesForFTPMC: eligibility.FTPMC,
     eligibleSchemes: stacking.eligibleList.map((key) => ({
       scheme: key,
-      quotaNote: SCHEME_QUOTA_NOTES[key] || "",
+      quotaNote: SCHEME_CONFIG[key].quotaNote || "",
     })),
     recommendedStacking: {
       primary: stacking.primary,

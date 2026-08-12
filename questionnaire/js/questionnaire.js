@@ -1,5 +1,5 @@
 import { ensureSignedIn, saveProgress, loadProgress } from "./firebase-config.js";
-import { buildEligibilityResult, SCHEME_QUOTA_NOTES } from "./rulesEngine.js";
+import { buildEligibilityResult } from "./rulesEngine.js";
 
 // --- Applicant state — this shape matches the Applicant object in
 // docs/BTO-Eligibility-Rules-Engine.md exactly, so the rules engine can
@@ -98,6 +98,14 @@ function render() {
     case "6": renderResults(card); break;
   }
   root.appendChild(card);
+  root.appendChild(buildFooterDisclaimer());
+}
+
+function buildFooterDisclaimer() {
+  const footer = document.createElement("div");
+  footer.className = "footer-disclaimer";
+  footer.innerHTML = `This tool gives an estimate based on publicly available HDB rules — it is not affiliated with HDB and does not replace your official HFE letter assessment.`;
+  return footer;
 }
 
 function buildHeader() {

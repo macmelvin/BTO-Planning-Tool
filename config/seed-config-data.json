@@ -48,7 +48,8 @@
       "name": "Senior Priority Scheme (near existing home)",
       "eligibleFlatTypes": ["2RoomFlexi"],
       "canPairWithSecondary": false,
-      "_needsConfirmation": "Exact senior age threshold not stated on source page as of last fetch — confirm before enabling this scheme in production, do not assume 55.",
+      "minAge": 55,
+      "_confirmedSource": "Cross-verified against Council of Third Age, CPF Board, and MyNiceHome — Aug 2026",
       "version": "2026-06-24"
     },
     "TPS": {
