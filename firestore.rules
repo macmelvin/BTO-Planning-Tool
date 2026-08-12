@@ -58,6 +58,10 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if false;
     }
+match /exerciseSummaries/{exercise} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
 
     match /projects/{projectId} {
       allow read: if request.auth != null;

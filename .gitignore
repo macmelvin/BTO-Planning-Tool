@@ -29,3 +29,4 @@ Thumbs.db
 
 # Firebase emulator data
 firebase-export-*/
+serviceAccountKey.json

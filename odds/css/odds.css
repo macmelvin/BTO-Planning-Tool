@@ -1,0 +1,4 @@
+.tone-good { color: var(--color-good); }
+.tone-caution { color: var(--color-accent); }
+.tone-high { color: var(--color-flag); }
+.tone-neutral { color: var(--color-ink-soft); }
