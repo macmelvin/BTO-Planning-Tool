@@ -1,0 +1,19 @@
+.choice-select {
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-line);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 320px;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+.choice-select:focus {
+  outline: 2px solid var(--color-accent-ink);
+  outline-offset: 2px;
+}
+
+.odds-result {
+  margin: 10px 0;
+}

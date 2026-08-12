@@ -40,10 +40,10 @@ This sprint has no user-visible output. That's normal — skipping it to get to 
 
 ## Sprint 4: Odds Calculator (Part A of the odds calculator doc)
 
-- [ ] Firestore schema for Project / FlatTypeOffering / SchemeQuotaPool
-- [ ] Seed initial dataset — start with the most recent 1-2 launch cycles, not full historical backfill (get something real and current working before going deep on history)
-- [ ] Implement tiered qualitative odds algorithm — resist the temptation to show a fake precise percentage
-- [ ] Application Rate Reference screen (searchable table)
+- [X] Firestore schema for Project / FlatTypeOffering / SchemeQuotaPool
+- [X] Seed initial dataset — start with the most recent 1-2 launch cycles, not full historical backfill (get something real and current working before going deep on history)
+- [X] Implement tiered qualitative odds algorithm — resist the temptation to show a fake precise percentage
+- [X] Application Rate Reference screen (searchable table)
 
 ## Sprint 5: Application Tracker
 
