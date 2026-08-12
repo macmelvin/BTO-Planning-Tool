@@ -219,7 +219,17 @@ function renderStep1(card) {
     { value: "Executive", text: "Executive" },
   ], applicant.targetFlatType, (v) => { applicant.targetFlatType = v; persist(); render(); });
 
-  const ready = applicant.maritalStatus && applicant.isFirstTimer !== null && applicant.citizenship && applicant.targetFlatType;
+  // If a spouse/fiancé(e) question is shown above (married or engaged),
+  // require it to be answered before continuing — otherwise it's easy to
+  // click through with spouseIsFirstTimer still null, which silently
+  // defaults isFirstTimerFamily to false in rulesEngine.js instead of
+  // reflecting a real answer.
+  const needsSpouseAnswer = applicant.maritalStatus === "married" || applicant.maritalStatus === "engaged";
+  const ready = applicant.maritalStatus
+    && applicant.isFirstTimer !== null
+    && applicant.citizenship
+    && applicant.targetFlatType
+    && (!needsSpouseAnswer || applicant.spouseIsFirstTimer !== null);
   navRow(card, {
     showBack: false,
     onNext: () => { if (ready) goTo(nextStepFrom("1")); },
