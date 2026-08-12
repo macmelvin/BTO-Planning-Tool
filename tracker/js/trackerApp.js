@@ -8,6 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { app, ensureSignedIn } from "../../questionnaire/js/firebase-config.js";
 import { listProjects, getFlatTypeOffering, estimateOdds } from "../../odds/js/oddsCalculator.js";
+import { buildNav } from "../../shared/nav.js";
 
 const db = getFirestore(app);
 const root = document.getElementById("tracker-root");
@@ -47,6 +48,7 @@ async function removeApplication(id) {
 function render() {
   root.innerHTML = "";
   root.appendChild(buildHeader());
+  root.appendChild(buildNav("tracker"));
   root.appendChild(buildAddCard());
   root.appendChild(buildApplicationsList());
   root.appendChild(buildFooterDisclaimer());

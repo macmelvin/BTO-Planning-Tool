@@ -250,6 +250,67 @@ input:focus, .choice-btn:focus-visible {
   margin-top: 24px;
 }
 
+/* --- Persistent footer disclaimer (shown on every step) --- */
+.footer-disclaimer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-ink);
+  color: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.4;
+  padding: 10px 20px;
+  text-align: center;
+  z-index: 10;
+}
+@media (min-width: 640px) {
+  .footer-disclaimer { font-size: 12px; }
+}
+
+/* room for the fixed footer so it never covers the last card's content */
+.app { padding-bottom: 90px; }
+
+/* --- Cross-page navigation --- */
+.app-nav-home {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-decoration: none;
+  color: var(--color-accent-ink);
+  margin-bottom: 10px;
+}
+.app-nav-home:hover { text-decoration: underline; }
+
+.app-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: 2px;
+  overflow-x: auto;
+}
+.app-nav a {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-decoration: none;
+  color: var(--color-ink-soft);
+  padding: 8px 12px;
+  border-radius: 6px 6px 0 0;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.app-nav a:hover {
+  color: var(--color-ink);
+  background: #FBFAF6;
+}
+.app-nav a.active {
+  color: var(--color-ink);
+  border-bottom: 2px solid var(--color-accent);
+  font-weight: 500;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }

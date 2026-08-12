@@ -1,0 +1,49 @@
+{
+  "_instructions": "This is a TEMPLATE showing the shape Claude should fill in. Delete this file or don't commit it — the real working file is scripts/research-update.json (gitignored, since it's just a scratch file each cycle). All fields except the required ones noted below are optional — omit anything not found/confirmed rather than guessing.",
+
+  "launchWindows": [
+    {
+      "quarter": "2026-11",
+      "applicationOpenDate": "2026-11-18",
+      "dateConfirmed": true,
+      "towns": ["Tengah", "Yishun"]
+    }
+  ],
+
+  "projects": [
+    {
+      "id": "example-project-2026-11",
+      "name": "Example Project Name",
+      "town": "Yishun",
+      "launchExercise": "2026-11",
+      "exerciseType": "BTO",
+      "classification": "Standard",
+      "townMaturity": "mature",
+      "offerings": [
+        {
+          "flatType": "4Room",
+          "totalUnitsSupply": 250,
+          "applicationRates": {
+            "firstTimerFamily": 1.4,
+            "firstTimerSingle": null,
+            "secondTimer": null,
+            "overall": null
+          },
+          "dataSource": "Article title / publication — e.g. 'StackedHomes Nov 2026 BTO review'",
+          "dataAsOf": "2026-11-25"
+        }
+      ]
+    }
+  ],
+
+  "exerciseSummary": {
+    "exercise": "2026-11",
+    "totalProjects": 6,
+    "totalUnits": 5800,
+    "totalApplications": 18000,
+    "overallSubscriptionRate": 3.1,
+    "towns": ["Tengah", "Yishun", "Sembawang"],
+    "note": "Any caveats — e.g. which projects don't have confirmed rates yet",
+    "dataSource": "Where the summary totals came from"
+  }
+}

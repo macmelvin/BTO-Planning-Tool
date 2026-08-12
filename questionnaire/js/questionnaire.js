@@ -1,5 +1,6 @@
 import { ensureSignedIn, saveProgress, loadProgress } from "./firebase-config.js";
 import { buildEligibilityResult } from "./rulesEngine.js";
+import { buildNav } from "../../shared/nav.js";
 
 // --- Applicant state — this shape matches the Applicant object in
 // docs/BTO-Eligibility-Rules-Engine.md exactly, so the rules engine can
@@ -84,6 +85,7 @@ function prevStepFrom(step) {
 function render() {
   root.innerHTML = "";
   root.appendChild(buildHeader());
+  root.appendChild(buildNav("eligibility"));
   root.appendChild(buildTicketStub());
 
   const card = document.createElement("div");

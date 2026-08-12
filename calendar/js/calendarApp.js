@@ -1,6 +1,7 @@
 import { getNextLaunchWindow, getHfeDeadline, daysUntil, formatDate, listLaunchWindows } from "./launchCalendar.js";
 import { enableLaunchReminders } from "./notifications.js";
 import { ensureSignedIn } from "../../questionnaire/js/firebase-config.js";
+import { buildNav } from "../../shared/nav.js";
 
 const root = document.getElementById("calendar-root");
 
@@ -14,6 +15,7 @@ async function init() {
 async function render() {
   root.innerHTML = "";
   root.appendChild(buildHeader());
+  root.appendChild(buildNav("calendar"));
   root.appendChild(await buildNextLaunchCard());
   root.appendChild(buildReminderCard());
   root.appendChild(await buildFullCalendar());

@@ -1,6 +1,7 @@
 import { listProjects, getExerciseSummary, describeApplicationRate } from "./oddsCalculator.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { app, ensureSignedIn } from "../../questionnaire/js/firebase-config.js";
+import { buildNav } from "../../shared/nav.js";
 
 const db = getFirestore(app);
 const root = document.getElementById("odds-root");
@@ -26,6 +27,7 @@ async function loadProjectsWithOfferings() {
 function render(filterText = "") {
   root.innerHTML = "";
   root.appendChild(buildHeader());
+  root.appendChild(buildNav("odds"));
   root.appendChild(buildSearchBox(filterText));
 
   const summaryCard = buildExerciseSummaryPlaceholder();
