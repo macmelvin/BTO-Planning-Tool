@@ -38,7 +38,7 @@ import {
 import { app, auth, db } from "../../questionnaire/js/firebase-config.js";
 
 // TODO: paste your VAPID public key from Firebase Console → Cloud Messaging
-const VAPID_PUBLIC_KEY = "YOUR_VAPID_PUBLIC_KEY";
+const VAPID_PUBLIC_KEY = "BDqNuxUTFwudpnnE_P1v6L_JASjUd_bD1KLzRkTJuGVTio67e_ZNCWGAezPM63rywDEa0CeXu5TQrAQdjDzZ3m8";
 
 export async function enableLaunchReminders() {
   if (!("serviceWorker" in navigator) || !("Notification" in window)) {
