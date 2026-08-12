@@ -29,6 +29,16 @@ service cloud.firestore {
           && request.resource.data.flatType is string;
         allow delete: if isOwner(userId);
       }
+
+      // Sprint 3: FCM push tokens. Read access isn't needed client-side
+      // (the app writes a token and never needs to read it back), so this
+      // is write/delete only from the client — the Cloud Function that
+      // sends reminders uses the Admin SDK, which bypasses these rules
+      // entirely, so no read rule is needed here for that path either.
+      match /notificationTokens/{tokenId} {
+        allow write, delete: if isOwner(userId);
+        allow read: if false;
+      }
     }
 
     // ---------------------------------------------------------------

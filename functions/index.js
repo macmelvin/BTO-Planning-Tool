@@ -11,7 +11,9 @@ exports.cleanupUserData = functions.auth.user().onDelete(async (user) => {
   const db = admin.firestore();
   const userDocRef = db.collection('users').doc(user.uid);
 
-  const subcollections = ['eligibilityAnswers', 'applications'];
+  // Sprint 3 adds 'notificationTokens' — without this, a deleted user's
+  // push token would silently keep receiving reminders indefinitely.
+  const subcollections = ['eligibilityAnswers', 'applications', 'notificationTokens'];
   for (const sub of subcollections) {
     const snapshot = await userDocRef.collection(sub).get();
     const batch = db.batch();
@@ -25,3 +27,6 @@ exports.cleanupUserData = functions.auth.user().onDelete(async (user) => {
 
   console.log(`Cleaned up Firestore data for deleted user: ${user.uid}`);
 });
+
+// Sprint 3: quarterly launch + HFE deadline reminders via FCM.
+exports.sendLaunchReminders = require('./sendReminders').sendLaunchReminders;
