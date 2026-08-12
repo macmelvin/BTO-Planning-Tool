@@ -12,37 +12,33 @@
  *    Web Push certificate (VAPID key pair) — paste the public key below.
  * 2. firebase-messaging-sw.js must sit at the DOMAIN ROOT (not inside
  *    /calendar/), so it can control the whole origin's push scope.
+ *
+ * Config consolidation note: this file now imports the already-initialized
+ * `app`, `auth`, and `db` from questionnaire/js/firebase-config.js instead
+ * of calling initializeApp() again with its own copy of the credentials —
+ * that duplication was the same pattern that caused the Sprint 6 rework
+ * for launch windows, fixed here before it caused the same problem twice.
+ *
+ * firebase-messaging-sw.js (the service worker) still has its own copy of
+ * the config, and that one genuinely can't be consolidated the same way:
+ * it's registered as a classic script (not an ES module), so it can't use
+ * `import` — only `importScripts()`, which doesn't support importing a
+ * plain JS object from another file the way ES modules do. Left as a
+ * documented exception rather than silently duplicated without explanation.
  */
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getMessaging,
   getToken,
   onMessage,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 import {
-  getFirestore,
   doc,
   setDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-// TODO: same config as questionnaire/js/firebase-config.js — keep in sync,
-// or better, extract to one shared config file both pages import from.
-const firebaseConfig = {
-  apiKey: "AIzaSyCrogqwbg6gzp3rghlem7GRNCPoWtdLxGQ",
-  authDomain: "bto-planning-tool.firebaseapp.com",
-  projectId: "bto-planning-tool",
-  storageBucket: "bto-planning-tool.firebasestorage.app",
-  messagingSenderId: "433070319814",
-  appId: "1:433070319814:web:1f8cbb0a879f2161f64fc7",
-};
+import { app, auth, db } from "../../questionnaire/js/firebase-config.js";
 
 // TODO: paste your VAPID public key from Firebase Console → Cloud Messaging
-const VAPID_PUBLIC_KEY = "BDqNuxUTFwudpnnE_P1v6L_JASjUd_bD1KLzRkTJuGVTio67e_ZNCWGAezPM63rywDEa0CeXu5TQrAQdjDzZ3m8";
-
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+const VAPID_PUBLIC_KEY = "YOUR_VAPID_PUBLIC_KEY";
 
 export async function enableLaunchReminders() {
   if (!("serviceWorker" in navigator) || !("Notification" in window)) {
