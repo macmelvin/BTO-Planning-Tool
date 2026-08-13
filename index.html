@@ -18,6 +18,19 @@
       color: var(--color-accent-ink);
       font-size: 13px;
     }
+    .sister-card .card {
+      border: 1.5px dashed var(--color-accent-ink);
+    }
+    .sister-card:hover .card { border-color: var(--color-accent-ink); }
+    .sister-card .eyebrow-small {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-accent-ink);
+      display: block;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
@@ -61,6 +74,15 @@
         <p class="helper">Track your queue numbers across attempts and check your odds as your selection appointment approaches.</p>
         <span class="arrow">Open my applications →</span>
         <div class="flag-box" style="margin-top:10px;">We try to keep odds estimates as accurate as possible, but they're based on historical patterns, not guarantees — always confirm your actual outcome with HDB directly.</div>
+      </div>
+    </a>
+
+    <a class="landing-card sister-card" href="https://sg-money-cpf-hdb-calculator-production.up.railway.app/" target="_blank" rel="noopener noreferrer">
+      <div class="card">
+        <span class="eyebrow-small">From the same team</span>
+        <h2>Figure out the money side too</h2>
+        <p class="helper">SG Money's free calculators cover your take-home salary &amp; CPF, what you'd actually get selling your current flat, CPF accrued interest, and whether you're on track for retirement — useful alongside your BTO budget planning.</p>
+        <span class="arrow">Open SG Money ↗</span>
       </div>
     </a>
 
